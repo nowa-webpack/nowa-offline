@@ -1,6 +1,6 @@
 {
   "name": "nowa-offline",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "bundle your assets to dingTalk offline package",
   "main": "index.js",
   "scripts": {
