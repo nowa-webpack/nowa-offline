@@ -1,0 +1,33 @@
+{
+  "name": "nowa-offline",
+  "version": "0.0.3",
+  "description": "bundle your assets to dingTalk offline package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nowa-webpack/nowa-offine.git"
+  },
+  "keywords": [
+    "nowa",
+    "offline"
+  ],
+  "author": "Tommy",
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^2.1.0",
+    "co": "^4.6.0",
+    "execa": "^0.8.0",
+    "fs-extra": "^5.0.0",
+    "handlebars": "^4.0.11",
+    "jszip": "^3.1.5"
+  },
+  "devDependencies": {
+    "@types/archiver": "^2.0.1",
+    "@types/execa": "^0.8.0",
+    "@types/fs-extra": "^5.0.0",
+    "@types/jszip": "^3.1.2"
+  }
+}
