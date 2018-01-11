@@ -6,6 +6,7 @@ const co = require('co');
 const execa = require('execa');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
+const JSON5 = require('json5');
 
 const utils = require('./utils');
 const pkg = require('../package.json');
@@ -13,7 +14,8 @@ const pkg = require('../package.json');
 const context = process.cwd();
 
 function* createOfflinePackage({ rootPath, version, name, description, skipBuild, skipCompress }) {
-  const config = yield fs.readJSON(`${rootPath}/config.json`);
+  const configString = yield fs.readFile(`${rootPath}/config.json`, { encoding: 'utf-8' });
+  const config = JSON5.parse(configString);
   const entry = config.htmls['index.htm'];
   if (!entry) {
     throw new Error(`can't find entry "index.htm" in your config['htmls']`);
