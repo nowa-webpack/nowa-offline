@@ -1,0 +1,25 @@
+try {
+  (function() {
+    var createPath = function(arr, obj) {
+      var cPath;
+      var cObj = obj;
+      for (var i = 0; i < arr.length; i++) {
+        cPath = arr[i];
+        if ((cObj[cPath] !== undefined && typeof cObj[cPath] !== 'object') || cObj[cPath] === null) {
+          return undefined;
+        }
+        if (cObj[cPath] === undefined) {
+          cObj[cPath] = {};
+        }
+        cObj = cObj[cPath];
+      }
+      return cObj;
+    };
+    var params = createPath(['AliMonitor', 'config', 'modules', 'monitor', 'performance', 'params'], window);
+    params && (params.ddoffline = 1);
+  })();
+} catch (e) {
+  console && console.error && console.error(e);
+}
+
+require('./{{{appEntry}}}');

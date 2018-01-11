@@ -13,7 +13,7 @@ const pkg = require('../package.json');
 
 const context = process.cwd();
 
-function* createOfflinePackage({ rootPath, version, name, description, skipBuild, skipCompress }) {
+function* createOfflinePackage({ rootPath, version, name, description, skipBuild, skipCompress, appEntry }) {
   const configString = yield fs.readFile(`${rootPath}/config.json`, { encoding: 'utf-8' });
   const config = JSON5.parse(configString);
   const entry = config.htmls['index.htm'];
@@ -37,6 +37,10 @@ function* createOfflinePackage({ rootPath, version, name, description, skipBuild
   console.log(`create folder ${assetsPath}`);
   yield fs.ensureDir(assetsPath);
   if (!skipBuild) {
+    const entryFileSource = yield fs.readFile(`${__dirname}/templates/entry.js.hbs`, { encoding: 'utf-8' });
+    const entryFileString = Handlebars.compile(entryFileSource)({ appEntry });
+    yield fs.writeFile(context + '/src/__nowa_offline_entry.js', entryFileString);
+    console.log(`tmp entry created at ${context}/src/__nowa_offline_entry.js`);
     let commandPrefix;
     switch (process.platform) {
       case 'win32':
@@ -45,9 +49,11 @@ function* createOfflinePackage({ rootPath, version, name, description, skipBuild
       default:
         commandPrefix = `export path=${path.resolve(context, 'node_modules/.bin')}:$path ;`;
     }
-    const cpPromise = execa.shell(`${commandPrefix} nowa build --publicPath /assets -d ${path.relative(context, nowaBuildPath)}`);
+    const cpPromise = execa.shell(`${commandPrefix} nowa build --publicPath /${assetsPath} -d ${path.relative(context, nowaBuildPath)} -e __nowa_offline_entry.js`);
     cpPromise.stdout.pipe(process.stdout);
     yield cpPromise;
+    yield fs.remove(context + '/src/__nowa_offline_entry.js');
+    console.log(`remove tmp entry ${context}/src/__nowa_offline_entry.js`);
   }
   console.log(`copy all file from ${nowaBuildPath}`);
   console.log(`to ${assetsPath}, except htmls`);
@@ -81,7 +87,12 @@ function* createOfflinePackage({ rootPath, version, name, description, skipBuild
 module.exports = {
   description: pkg.description,
 
-  options: [['-p, --path [path]', 'offline package html/config', 'offline'], ['-s, --skipBuild', 'skip nowa build', false], ['-c, --skipCompress', 'skip compress', false]],
+  options: [
+    ['-p, --path [path]', 'offline package html/config', 'offline'],
+    ['-s, --skipBuild', 'skip nowa build', false],
+    ['-c, --skipCompress', 'skip compress', false],
+    ['-e, --entry <file>', 'app entry, default to `app/app.js', 'app/app.js'],
+  ],
 
   action: function(options) {
     let version;
@@ -104,6 +115,6 @@ module.exports = {
       }
     }
     const rootPath = path.resolve(context, options.path);
-    co(createOfflinePackage({ rootPath, version, name, description, skipBuild: options.skipBuild, skipCompress: options.skipCompress })).then(console.log, console.error);
+    co(createOfflinePackage({ rootPath, version, name, description, skipBuild: options.skipBuild, skipCompress: options.skipCompress, appEntry: options.entry })).then(console.log, console.error);
   },
 };
